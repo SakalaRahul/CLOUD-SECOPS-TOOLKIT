@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Lint
+        run: |
+          pip install flake8
+          flake8 secops tests --max-line-length=100
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Scan own dependencies for known vulnerabilities
+        run: python -m secops.vulnscan requirements.txt
